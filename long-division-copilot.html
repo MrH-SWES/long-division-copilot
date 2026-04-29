@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Division Copilot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #c4c4c4;
+            --card: #ffffff;
+            --blue: #4285f4;
+            --blue-dark: #3367d6;
+            --yellow: #f4b400; /* Kept for specific highlights, but removed from main UI elements */
+            --yellow-dark: #db9e00;
+            --coral: #ea4335;
+            --coral-light: #f87171;
+            --green: #34a853;
+            --green-dark: #2d8a47;
+            --text: #1a1a1a;
+            --text-muted: #5f5f5f;
+            --shadow: rgba(0,0,0,0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .header-btn {
+            padding: 10px 20px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 3px 0 var(--shadow);
+        }
+
+        .header-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--shadow);
+        }
+
+        .btn-coral {
+            background: var(--coral);
+            color: white;
+        }
+
+        .btn-coral:hover {
+            background: var(--coral-light);
+        }
+
+        .btn-blue {
+            background: var(--blue);
+            color: white;
+        }
+
+        .btn-blue:hover {
+            background: var(--blue-dark);
+        }
+
+        .btn-green {
+            background: var(--green);
+            color: white;
+        }
+
+        .btn-green:hover {
+            background: var(--green-dark);
+        }
+
+        /* Setup Screen */
+        .setup-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .setup-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 12px var(--shadow);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .setup-card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        /* Tabs */
+        .input-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: #e5e5e5;
+            color: var(--text-muted);
+        }
+
+        .tab-btn.active {
+            background: var(--blue);
+            color: white;
+            box-shadow: 0 3px 0 var(--blue-dark);
+        }
+
+        .input-method {
+            display: none;
+        }
+
+        .input-method.active {
+            display: block;
+        }
+
+        /* Simple inputs */
+        .simple-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 14px 16px;
+            font-family: 'Lexend', sans-serif;
+            font-size: 1.2rem;
+            border: 3px solid #e5e5e5;
+            border-radius: 10px;
+            transition: border-color 0.15s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--blue);
+        }
+
+        /* House input */
+        .house-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 0;
+            margin-bottom: 12px;
+        }
+
+        .house-visual {
+            position: relative;
+        }
+
+        .house-main {
+            display: flex;
+            align-items: stretch;
+        }
+
+        .house-divisor-input {
+            width: 70px;
+            padding: 12px;
+            font-family: 'Lexend', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            text-align: center;
+            border: 3px solid #e5e5e5;
+            border-radius: 10px;
+            margin-right: 8px;
+            /* UPDATED: Removed yellow background for cleaner look */
+            background: white;
+            color: var(--text);
+        }
+
+        .house-divisor-input:focus {
+            outline: none;
+            border-color: var(--blue);
+        }
+
+        .house-bracket {
+            position: relative;
+            border-left: 4px solid var(--text);
+            border-top: 4px solid var(--text);
+            border-top-left-radius: 16px;
+            padding: 12px 16px 12px 12px;
+            background: white;
+        }
+
+        .house-dividend-input {
+            width: 180px;
+            padding: 12px;
+            font-family: 'Lexend', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            text-align: center;
+            border: 3px solid #e5e5e5;
+            border-radius: 10px;
+            background: var(--card);
+        }
+
+        .house-dividend-input:focus {
+            outline: none;
+            border-color: var(--blue);
+        }
+
+        .house-hint {
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* Buttons */
+        .setup-btn {
+            width: 100%;
+            padding: 16px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 12px;
+        }
+
+        .setup-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-start {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 4px 0 var(--green-dark);
+        }
+
+        .btn-start:hover {
+            background: #3cb95e;
+        }
+
+        .btn-start:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 var(--green-dark);
+        }
+
+        .btn-random {
+            background: var(--blue);
+            color: white;
+            box-shadow: 0 4px 0 var(--blue-dark);
+        }
+
+        .btn-random:hover {
+            background: #5a9cf5;
+        }
+
+        .btn-random:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 var(--blue-dark);
+        }
+
+        .random-options {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .random-options.show {
+            display: block;
+        }
+
+        .option-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .option-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .option-row select {
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+
+        /* Problem Screen */
+        .problem-screen {
+            display: none;
+        }
+
+        .problem-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        /* Main work area */
+        .work-panel {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px var(--shadow);
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Concept banner */
+        .concept-banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            background: #f0f7ff;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .concept-banner .amount {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--blue);
+        }
+
+        .concept-banner .arrow {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        .concept-banner .piles-text {
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+
+        /* Division display */
+        .division-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .long-division {
+            font-size: 2rem;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .quotient-row {
+            display: flex;
+            min-height: 2.5rem;
+            margin-bottom: 4px;
+            margin-left: 70px;
+        }
+
+        .quotient-digit {
+            width: 1.2em;
+            text-align: center;
+            color: var(--green);
+        }
+
+        .dividend-row {
+            display: flex;
+            align-items: stretch;
+        }
+
+        .divisor-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            margin-right: 4px;
+            /* UPDATED: Removed yellow background */
+            background: transparent;
+            color: var(--text);
+            border-radius: 8px;
+            font-weight: 700;
+            min-width: 50px;
+        }
+
+        .bracket {
+            border-left: 4px solid var(--text);
+            border-top: 4px solid var(--text);
+            border-top-left-radius: 12px;
+            padding: 8px 12px 8px 8px;
+        }
+
+        .dividend-digits {
+            display: flex;
+        }
+
+        .digit {
+            width: 1.2em;
+            text-align: center;
+            padding: 4px 2px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .digit.highlight {
+            background: #fff8e1; /* Very light yellow, barely visible */
+        }
+
+        .digit.active {
+            background: var(--blue);
+            color: white;
+        }
+
+        /* Bring Down Button Style */
+        .bring-down-btn {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--blue);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(66, 133, 244, 0.4);
+            animation: bounce 1s infinite;
+            z-index: 10;
+        }
+
+        .bring-down-btn:hover {
+            background: var(--blue-dark);
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        @keyframes bounce {
+            0%, 100% { bottom: -35px; }
+            50% { bottom: -42px; }
+        }
+
+        /* Work rows */
+        .work-rows {
+            margin-top: 8px;
+            margin-left: 70px;
+            min-height: 150px;
+        }
+
+        .work-row {
+            display: flex;
+            min-height: 2.5rem;
+            align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .work-row.subtract {
+            position: relative;
+        }
+        
+        .work-row.subtract::before {
+            content: '−';
+            position: absolute;
+            left: -1.2em;
+            color: var(--coral);
+            font-weight: 700;
+        }
+
+        .work-row.line {
+            border-bottom: 3px solid var(--text);
+            margin: 4px 0;
+            min-height: 0;
+            height: 3px;
+        }
+
+        .work-digit {
+            width: 1.2em;
+            text-align: center;
+        }
+
+        .work-digit.brought {
+            color: var(--text); 
+            font-weight: 700;
+        }
+
+        /* Prompt area */
+        .prompt-area {
+            text-align: center;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 12px;
+        }
+
+        .prompt-text {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .prompt-text strong {
+            color: var(--blue);
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .answer-input {
+            width: 100px;
+            padding: 14px;
+            font-family: 'Lexend', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            transition: all 0.15s;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.2);
+        }
+
+        .check-btn {
+            padding: 14px 28px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: var(--green);
+            color: white;
+            box-shadow: 0 3px 0 var(--green-dark);
+            transition: all 0.15s;
+        }
+
+        .check-btn:hover {
+            background: #3cb95e;
+        }
+
+        .check-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--green-dark);
+        }
+
+        .yes-no-btns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .yn-btn {
+            padding: 14px 32px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .yn-btn.yes {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 3px 0 var(--green-dark);
+        }
+
+        .yn-btn.no {
+            background: var(--coral);
+            color: white;
+            box-shadow: 0 3px 0 #c62828;
+        }
+
+        .yn-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--shadow);
+        }
+
+        /* Helper Button */
+        .btn-help {
+            background: #e8f0fe;
+            color: var(--blue-dark);
+            border: 2px solid var(--blue);
+            font-size: 0.9rem;
+            padding: 10px 16px;
+        }
+        
+        .btn-help:hover {
+            background: #d2e3fc;
+        }
+
+        /* Mult Chart Thumbnail Button */
+        .mult-chart-btn {
+            padding: 0;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 3px solid var(--blue);
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 0 var(--blue-dark);
+        }
+
+        .mult-chart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 0 var(--blue-dark);
+        }
+
+        .mult-chart-btn:active {
+            transform: scale(0.98) translateY(2px);
+            box-shadow: 0 1px 0 var(--blue-dark);
+        }
+
+        .mult-chart-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Feedback */
+        .feedback {
+            margin-top: 16px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.error {
+            background: #ffebee;
+            color: var(--coral);
+        }
+
+        .feedback.success {
+            background: #e8f5e9;
+            color: var(--green);
+        }
+
+        .feedback.hint {
+            background: #fff8e1;
+            color: #f57c00;
+        }
+
+        /* Completion / Victory */
+        .completion {
+            display: none;
+            text-align: center;
+            padding: 32px;
+        }
+
+        .completion.show {
+            display: block;
+            animation: pop 0.4s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .completion h2 {
+            font-size: 2rem;
+            color: var(--green);
+            margin-bottom: 16px;
+        }
+
+        .completion .result {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .completion .pile-summary {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        /* Victory piles animation */
+        .victory-piles {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 24px 0;
+        }
+
+        .victory-pile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .victory-pile-box {
+            background: var(--blue);
+            border-radius: 10px;
+            box-shadow: 0 4px 0 var(--blue-dark);
+            padding: 8px;
+            position: relative;
+            overflow: auto;
+            max-height: 300px;
+        }
+
+        /* Dot grid container */
+        .dot-grid {
+            display: grid;
+            gap: 2px;
+            justify-content: center;
+        }
+
+        .dot {
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.2s ease;
+        }
+
+        .dot.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .victory-pile-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Remainder section */
+        .remainder-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            width: 100%;
+        }
+
+        .remainder-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--coral);
+        }
+
+        .remainder-blocks {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 3px;
+            padding: 12px;
+            background: #ffebee;
+            border-radius: 10px;
+            border: 2px dashed var(--coral);
+        }
+
+        .remainder-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--coral);
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* ESTIMATION MODAL */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.6); 
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 32px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 16px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover {
+            color: var(--text);
+        }
+
+        .modal h3 {
+            margin-bottom: 16px;
+            color: var(--blue);
+            font-size: 1.5rem;
+        }
+
+        .est-feedback {
+            margin-top: 16px;
+            font-weight: 500;
+            min-height: 24px;
+        }
+        
+        .est-feedback.success { color: var(--green); }
+        .est-feedback.error { color: var(--coral); }
+        
+        .est-input-group {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Long Division Copilot</h1>
+            <button class="header-btn btn-coral hidden" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="setup-screen" id="setupScreen">
+            <div class="setup-card">
+                <h2>Enter Your Problem</h2>
+
+                <div class="input-tabs">
+                    <button class="tab-btn active" data-tab="simple">Type Numbers</button>
+                    <button class="tab-btn" data-tab="house">Use the House</button>
+                </div>
+
+                <div class="input-method active" id="simpleMethod">
+                    <div class="simple-inputs">
+                        <div class="input-group">
+                            <label>Big number (goes inside the house)</label>
+                            <input type="number" id="bigNumber" min="10" max="99999" placeholder="e.g. 100">
+                        </div>
+                        <div class="input-group">
+                            <label>Small number (goes outside)</label>
+                            <input type="number" id="smallNumber" min="2" max="99" placeholder="e.g. 1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-method" id="houseMethod">
+                    <div class="house-container">
+                        <div class="house-visual">
+                            <div class="house-main">
+                                <input type="number" class="house-divisor-input" id="houseDivisor" min="2" max="99" placeholder="÷">
+                                <div class="house-bracket">
+                                    <input type="number" class="house-dividend-input" id="houseDividend" min="10" max="99999" placeholder="big number">
+                                </div>
+                            </div>
+                        </div>
+                        <p class="house-hint">Small number outside, big number inside</p>
+                    </div>
+                </div>
+
+                <button class="setup-btn btn-start" id="startBtn">Start</button>
+                <button class="setup-btn btn-random" id="randomBtn">Random Problem</button>
+
+                <div class="random-options" id="randomOptions">
+                    <div class="option-row">
+                        <label>Small number digits:</label>
+                        <select id="divisorDigits">
+                            <option value="1" selected>1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                    <div class="option-row">
+                        <label>Big number digits:</label>
+                        <select id="dividendDigits">
+                            <option value="2">2</option>
+                            <option value="3" selected>3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="problem-screen" id="problemScreen">
+            <div class="problem-layout">
+                <div class="work-panel">
+                    <div class="concept-banner" id="conceptBanner">
+                        <span class="amount" id="conceptAmount">100 things</span>
+                        <span class="arrow">→</span>
+                        <span class="piles-text">splitting into <strong id="conceptPiles">1</strong> equal piles</span>
+                        <span class="arrow">→</span>
+                        <span class="piles-text"><strong id="conceptResult">?</strong> in each pile</span>
+                    </div>
+
+                    <div class="division-area">
+                        <div class="long-division">
+                            <div class="quotient-row" id="quotientRow"></div>
+                            <div class="dividend-row">
+                                <div class="divisor-display" id="divisorDisplay"></div>
+                                <div class="bracket">
+                                    <div class="dividend-digits" id="dividendDisplay"></div>
+                                </div>
+                            </div>
+                            <div class="work-rows" id="workRows"></div>
+                        </div>
+                    </div>
+
+                    <div class="prompt-area" id="promptArea">
+                        <p class="prompt-text" id="promptText"></p>
+                        <div class="input-row" id="inputRow"></div>
+                        <div class="feedback" id="feedback"></div>
+                    </div>
+
+                    <div class="completion" id="completion">
+                        <h2>🎉 Great Job!</h2>
+                        <p class="result" id="resultText"></p>
+                        <p class="pile-summary" id="pileSummary"></p>
+                        <div class="victory-piles" id="victoryPiles"></div>
+                        <button class="header-btn btn-green" id="newProblemBtn">New Problem</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="estimationModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeEstimationHelper()">&times;</span>
+                <h3 id="estTitle">Estimation Helper</h3>
+                <p id="estPrompt" class="prompt-text"></p>
+                <div id="estInputArea" class="est-input-group"></div>
+                <div id="estFeedback" class="est-feedback"></div>
+            </div>
+        </div>
+
+        <div id="multChartModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeMultChart()">&times;</span>
+                <h3>Multiplication Chart</h3>
+                <img src="MultiplicationTable.png" alt="Multiplication Table" style="width: 100%; max-width: 500px; border-radius: 8px;">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let divisor = 0;
+        let dividend = 0;
+        let dividendDigits = [];
+        let quotientDigits = [];
+        let currentPosition = 0;
+        let currentNumber = 0;
+        let workRows = [];
+        let attempts = 0;
+        let step = 'check-fit';
+        let currentQuotientDigit = 0;
+        let runningQuotient = 0;
+
+        // Estimation Helper State
+        let estStep = 0;
+        let roundedDivisor = 0;
+        let roundedDividend = 0;
+
+        // DOM
+        const setupScreen = document.getElementById('setupScreen');
+        const problemScreen = document.getElementById('problemScreen');
+        const resetBtn = document.getElementById('resetBtn');
+        const conceptBanner = document.getElementById('conceptBanner');
+        const estModal = document.getElementById('estimationModal');
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.input-method').forEach(m => m.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab + 'Method').classList.add('active');
+            });
+        });
+
+        // Sync inputs
+        const syncInputs = (src, dest) => {
+            document.getElementById(src).addEventListener('input', e => {
+                document.getElementById(dest).value = e.target.value;
+            });
+        };
+        syncInputs('bigNumber', 'houseDividend');
+        syncInputs('smallNumber', 'houseDivisor');
+        syncInputs('houseDividend', 'bigNumber');
+        syncInputs('houseDivisor', 'smallNumber');
+
+        // Enter key handling
+        ['bigNumber', 'smallNumber', 'houseDividend', 'houseDivisor'].forEach(id => {
+            document.getElementById(id).addEventListener('keypress', e => {
+                if (e.key === 'Enter') startFromInput();
+            });
+        });
+
+        // Buttons
+        document.getElementById('startBtn').addEventListener('click', startFromInput);
+        document.getElementById('randomBtn').addEventListener('click', handleRandomClick);
+        document.getElementById('newProblemBtn').addEventListener('click', resetToSetup);
+        resetBtn.addEventListener('click', resetToSetup);
+
+        let randomClickCount = 0;
+        function handleRandomClick() {
+            const opts = document.getElementById('randomOptions');
+            if (!opts.classList.contains('show')) {
+                opts.classList.add('show');
+            } else {
+                generateProblem();
+            }
+        }
+
+        function startFromInput() {
+            const big = parseInt(document.getElementById('bigNumber').value || document.getElementById('houseDividend').value);
+            const small = parseInt(document.getElementById('smallNumber').value || document.getElementById('houseDivisor').value);
+
+            if (!small || small < 1 || small > 99) {
+                alert('Enter a small number between 1 and 99');
+                return;
+            }
+            if (!big || big < 10 || big > 99999) {
+                alert('Enter a big number between 10 and 99999');
+                return;
+            }
+            if (big < small) {
+                alert('The big number should be larger than the small number');
+                return;
+            }
+
+            divisor = small;
+            dividend = big;
+            startProblem();
+        }
+
+        function generateProblem() {
+            const divisorDigitCount = parseInt(document.getElementById('divisorDigits').value);
+            const dividendDigitCount = parseInt(document.getElementById('dividendDigits').value);
+            
+            // UPDATED: Randomly decide if there should be a remainder (50/50 chance)
+            const useRemainder = Math.random() > 0.5;
+
+            const divisorMin = divisorDigitCount === 1 ? 2 : 10;
+            const divisorMax = divisorDigitCount === 1 ? 9 : 99;
+            divisor = Math.floor(Math.random() * (divisorMax - divisorMin + 1)) + divisorMin;
+
+            const dividendMin = Math.pow(10, dividendDigitCount - 1);
+            const dividendMax = Math.pow(10, dividendDigitCount) - 1;
+
+            if (useRemainder) {
+                dividend = Math.floor(Math.random() * (dividendMax - dividendMin + 1)) + dividendMin;
+            } else {
+                const minQ = Math.ceil(dividendMin / divisor);
+                const maxQ = Math.floor(dividendMax / divisor);
+                const q = Math.floor(Math.random() * (maxQ - minQ + 1)) + minQ;
+                dividend = q * divisor;
+            }
+
+            startProblem();
+        }
+
+        function startProblem() {
+            dividendDigits = dividend.toString().split('').map(Number);
+            quotientDigits = new Array(dividendDigits.length).fill(null);
+            currentPosition = 0;
+            currentNumber = 0;
+            workRows = [];
+            attempts = 0;
+            step = 'check-fit';
+            runningQuotient = 0;
+
+            setupScreen.style.display = 'none';
+            problemScreen.style.display = 'block';
+            resetBtn.classList.remove('hidden');
+            document.getElementById('completion').classList.remove('show');
+            document.getElementById('promptArea').style.display = 'block';
+            
+            // Update concept banner
+            document.getElementById('conceptAmount').textContent = dividend + ' things';
+            document.getElementById('conceptPiles').textContent = divisor;
+            document.getElementById('conceptResult').textContent = '?';
+
+            renderDivision();
+            nextStep();
+        }
+
+        function renderDivision() {
+            document.getElementById('divisorDisplay').textContent = divisor;
+
+            const dividendEl = document.getElementById('dividendDisplay');
+            dividendEl.innerHTML = '';
+            dividendDigits.forEach((d, i) => {
+                const span = document.createElement('span');
+                span.className = 'digit';
+                span.textContent = d;
+                
+                // Only highlight current position
+                if (i === currentPosition) {
+                    span.classList.add('active');
+                }
+
+                // If waiting for manual bring down, add the button to the next digit
+                if (step === 'waiting-for-bring-down' && i === currentPosition) {
+                     const btn = document.createElement('button');
+                     btn.className = 'bring-down-btn';
+                     btn.innerHTML = '↓';
+                     btn.onclick = confirmBringDown;
+                     span.appendChild(btn);
+                }
+
+                dividendEl.appendChild(span);
+            });
+
+            const quotientEl = document.getElementById('quotientRow');
+            quotientEl.innerHTML = '';
+            quotientDigits.forEach(d => {
+                const span = document.createElement('span');
+                span.className = 'quotient-digit';
+                span.textContent = d !== null ? d : '';
+                quotientEl.appendChild(span);
+            });
+
+            const workEl = document.getElementById('workRows');
+            workEl.innerHTML = '';
+            workRows.forEach(row => {
+                const div = document.createElement('div');
+                div.className = 'work-row';
+                if (row.type === 'subtract') div.classList.add('subtract');
+                if (row.type === 'line') {
+                    div.classList.add('line');
+                    workEl.appendChild(div);
+                    return;
+                }
+
+                const digits = row.value.toString().split('');
+                const totalSlots = dividendDigits.length;
+                const rightmostPosition = row.position;
+                const startPosition = rightmostPosition - digits.length + 1;
+                
+                for (let i = 0; i < startPosition; i++) {
+                    const spacer = document.createElement('span');
+                    spacer.className = 'work-digit';
+                    spacer.innerHTML = '&nbsp;';
+                    div.appendChild(spacer);
+                }
+
+                digits.forEach((d, i) => {
+                    const span = document.createElement('span');
+                    span.className = 'work-digit';
+                    if (row.bringDown && i === digits.length - 1) {
+                        span.classList.add('brought');
+                    }
+                    span.textContent = d;
+                    div.appendChild(span);
+                });
+                
+                const endPosition = startPosition + digits.length;
+                for (let i = endPosition; i < totalSlots; i++) {
+                    const spacer = document.createElement('span');
+                    spacer.className = 'work-digit';
+                    spacer.innerHTML = '&nbsp;';
+                    div.appendChild(spacer);
+                }
+
+                workEl.appendChild(div);
+            });
+        }
+
+        function nextStep() {
+            document.getElementById('feedback').classList.remove('show');
+            attempts = 0;
+
+            if (currentPosition === 0) {
+                currentNumber = dividendDigits[0];
+            }
+
+            switch (step) {
+                case 'check-fit': showCheckFit(); break;
+                case 'estimate': showEstimate(); break;
+                case 'multiply': showMultiply(); break;
+                case 'subtract': showSubtract(); break;
+                case 'bring-down': initBringDown(); break;
+                case 'waiting-for-bring-down': 
+                    document.getElementById('promptText').innerHTML = 'Click the blue arrow below the next number to bring it down!';
+                    document.getElementById('inputRow').innerHTML = '';
+                    break;
+            }
+        }
+
+        function showCheckFit() {
+            document.getElementById('promptText').innerHTML = 
+                `Can <strong>${divisor}</strong> go into <strong>${currentNumber}</strong>?`;
+
+            document.getElementById('inputRow').innerHTML = `
+                <div class="yes-no-btns">
+                    <button class="yn-btn yes" onclick="handleCheckFit(true)">Yes</button>
+                    <button class="yn-btn no" onclick="handleCheckFit(false)">No</button>
+                </div>
+            `;
+        }
+
+        function handleCheckFit(answer) {
+            const canFit = currentNumber >= divisor;
+
+            if (answer === canFit) {
+                if (canFit) {
+                    step = 'estimate';
+                    nextStep();
+                } else {
+                    if (currentPosition === 0) {
+                        currentPosition++;
+                        currentNumber = currentNumber * 10 + dividendDigits[currentPosition];
+                        renderDivision();
+                        nextStep();
+                    } else {
+                        quotientDigits[currentPosition] = 0;
+                        renderDivision();
+                        step = 'bring-down';
+                        nextStep();
+                    }
+                }
+            } else {
+                showFeedback('error', canFit ?
+                    `Look at the table — ${divisor} can fit into ${currentNumber}!` :
+                    `${divisor} is bigger than ${currentNumber}, so it won't fit.`
+                );
+            }
+        }
+
+        function showEstimate() {
+            document.getElementById('promptText').innerHTML = 
+                `How many times can <strong>${divisor}</strong> go into <strong>${currentNumber}</strong>?`;
+            
+            let helperBtn = '';
+            if (divisor > 12) {
+                helperBtn = `<button class="header-btn btn-help" onclick="openEstimationHelper()">💡 Help me guess</button>`;
+            }
+
+            document.getElementById('inputRow').innerHTML = `
+                <input type="number" class="answer-input" id="answerInput" min="0" max="10" autofocus>
+                <button class="check-btn" onclick="handleEstimate()">Check</button>
+                <button class="mult-chart-btn" onclick="openMultChart()">
+                    <img src="MultiplicationTable.png" alt="Times Table">
+                </button>
+                ${helperBtn}
+            `;
+
+            const input = document.getElementById('answerInput');
+            input.addEventListener('keypress', e => { if (e.key === 'Enter') handleEstimate(); });
+            input.focus();
+        }
+        
+        function handleEstimate() {
+            const input = document.getElementById('answerInput');
+            const answer = parseInt(input.value);
+            const correct = Math.floor(currentNumber / divisor);
+
+            if (answer === correct) {
+                currentQuotientDigit = answer;
+                quotientDigits[currentPosition] = answer;
+                
+                // Update running quotient
+                runningQuotient = parseInt(quotientDigits.filter(d => d !== null).join('') || '0');
+                
+                renderDivision();
+                document.getElementById('conceptResult').textContent = runningQuotient;
+                
+                showFeedback('success', 'Correct!');
+                setTimeout(() => { step = 'multiply'; nextStep(); }, 700);
+            } else {
+                attempts++;
+                const product = answer * divisor;
+                if (answer > correct) {
+                    showFeedback('error', `${divisor} × ${answer} = ${product}. Too big! Try a smaller number.`);
+                } else if (answer >= 0 && answer < correct) {
+                    showFeedback('hint', `${divisor} × ${answer} = ${product}. Fits, but you can fit more! Try a bigger number.`);
+                } else {
+                    showFeedback('error', 'Type a valid number.');
+                }
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        // --- ESTIMATION HELPER MODAL LOGIC ---
+        
+        function openEstimationHelper() {
+            estStep = 1;
+            estModal.classList.add('show');
+            document.getElementById('estFeedback').textContent = '';
+            document.getElementById('estFeedback').className = 'est-feedback';
+            renderEstimationStep();
+        }
+
+        function closeEstimationHelper() {
+            estModal.classList.remove('show');
+        }
+
+        function renderEstimationStep() {
+            const prompt = document.getElementById('estPrompt');
+            const area = document.getElementById('estInputArea');
+            area.innerHTML = '';
+            
+            const addInput = (handler) => {
+                 area.innerHTML = `
+                    <input type="number" class="answer-input" id="estInput" autofocus>
+                    <button class="check-btn" onclick="${handler}()">Check</button>
+                `;
+                const inp = document.getElementById('estInput');
+                inp.addEventListener('keypress', e => { if (e.key === 'Enter') window[handler](); });
+                setTimeout(() => inp.focus(), 50);
+            };
+
+            if (estStep === 1) {
+                const target = Math.round(divisor / 10) * 10;
+                prompt.innerHTML = `Let's make this easier. Round <strong>${divisor}</strong> to the nearest 10.`;
+                addInput('handleEstRoundDivisor');
+            } 
+            else if (estStep === 2) {
+                prompt.innerHTML = `Now, round <strong>${currentNumber}</strong> to the nearest 10.`;
+                addInput('handleEstRoundDividend');
+            } 
+            else if (estStep === 3) {
+                const est = Math.floor(roundedDividend / roundedDivisor);
+                const smallDiv = roundedDivisor / 10;
+                const smallDivd = roundedDividend / 10;
+                prompt.innerHTML = `How many times does <strong>${roundedDivisor}</strong> go into <strong>${roundedDividend}</strong>?<br>
+                <span style="font-size:0.9rem; color:#666;">(Hint: It's the same as ${smallDiv} into ${smallDivd})</span>`;
+                addInput('handleEstEstimate');
+            } 
+            else if (estStep === 4) {
+                const est = Math.floor(roundedDividend / roundedDivisor);
+                prompt.innerHTML = `Great! Try <strong>${est}</strong> for the real problem.`;
+                area.innerHTML = `<button class="check-btn" onclick="applyEstimation(${est})">Use ${est}</button>`;
+            }
+        }
+
+        function estFeedback(type, msg) {
+            const el = document.getElementById('estFeedback');
+            el.className = 'est-feedback ' + type;
+            el.textContent = msg;
+        }
+
+        function handleEstRoundDivisor() {
+            const val = parseInt(document.getElementById('estInput').value);
+            const target = Math.round(divisor / 10) * 10;
+            if (val === target) {
+                roundedDivisor = target;
+                estFeedback('success', 'Good!');
+                estStep = 2;
+                setTimeout(() => {
+                    document.getElementById('estFeedback').textContent = '';
+                    renderEstimationStep();
+                }, 600);
+            } else {
+                estFeedback('error', `Not quite. ${divisor} is closer to ${target}.`);
+            }
+        }
+
+        function handleEstRoundDividend() {
+            const val = parseInt(document.getElementById('estInput').value);
+            const target = Math.round(currentNumber / 10) * 10;
+            if (val === target) {
+                roundedDividend = target;
+                estFeedback('success', 'Nice!');
+                estStep = 3;
+                setTimeout(() => {
+                    document.getElementById('estFeedback').textContent = '';
+                    renderEstimationStep();
+                }, 600);
+            } else {
+                estFeedback('error', `Try again. ${currentNumber} is closer to ${target}.`);
+            }
+        }
+
+        function handleEstEstimate() {
+            const val = parseInt(document.getElementById('estInput').value);
+            const target = Math.floor(roundedDividend / roundedDivisor);
+            if (Math.abs(val - target) <= 1 || val === target) {
+                estFeedback('success', 'Excellent!');
+                estStep = 4;
+                setTimeout(() => {
+                    document.getElementById('estFeedback').textContent = '';
+                    renderEstimationStep();
+                }, 600);
+            } else {
+                const smallDiv = roundedDivisor / 10;
+                estFeedback('error', `Think about your ${smallDiv} times tables.`);
+            }
+        }
+
+        function applyEstimation(val) {
+            closeEstimationHelper();
+            const mainInput = document.getElementById('answerInput');
+            if (mainInput) {
+                mainInput.value = val;
+                mainInput.focus();
+            }
+        }
+
+        // --- MULTIPLICATION CHART MODAL ---
+        
+        function openMultChart() {
+            document.getElementById('multChartModal').classList.add('show');
+        }
+
+        function closeMultChart() {
+            document.getElementById('multChartModal').classList.remove('show');
+        }
+
+        // --- END MULTIPLICATION CHART ---
+
+        function showMultiply() {
+            document.getElementById('promptText').innerHTML = 
+                `What is <strong>${divisor} × ${currentQuotientDigit}</strong>?`;
+
+            document.getElementById('inputRow').innerHTML = `
+                <input type="number" class="answer-input" id="answerInput" autofocus>
+                <button class="check-btn" onclick="handleMultiply()">Check</button>
+            `;
+
+            const input = document.getElementById('answerInput');
+            input.addEventListener('keypress', e => { if (e.key === 'Enter') handleMultiply(); });
+            input.focus();
+        }
+
+        function handleMultiply() {
+            const input = document.getElementById('answerInput');
+            const answer = parseInt(input.value);
+            const correct = divisor * currentQuotientDigit;
+
+            if (answer === correct) {
+                workRows.push({ type: 'subtract', value: correct, position: currentPosition });
+                renderDivision();
+                showFeedback('success', 'Correct!');
+                setTimeout(() => { step = 'subtract'; nextStep(); }, 700);
+            } else {
+                attempts++;
+                if (attempts >= 2) {
+                    showFeedback('hint', `Calculate ${divisor} × ${currentQuotientDigit}`);
+                } else {
+                    showFeedback('error', 'Check your math again.');
+                }
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function showSubtract() {
+            const product = divisor * currentQuotientDigit;
+            document.getElementById('promptText').innerHTML = 
+                `What is <strong>${currentNumber} − ${product}</strong>?`;
+
+            document.getElementById('inputRow').innerHTML = `
+                <input type="number" class="answer-input" id="answerInput" autofocus>
+                <button class="check-btn" onclick="handleSubtract()">Check</button>
+            `;
+
+            const input = document.getElementById('answerInput');
+            input.addEventListener('keypress', e => { if (e.key === 'Enter') handleSubtract(); });
+            input.focus();
+        }
+
+        function handleSubtract() {
+            const input = document.getElementById('answerInput');
+            const answer = parseInt(input.value);
+            const product = divisor * currentQuotientDigit;
+            const correct = currentNumber - product;
+
+            if (answer === correct) {
+                workRows.push({ type: 'line', value: '', position: currentPosition });
+                workRows.push({ type: 'result', value: correct, position: currentPosition, bringDown: false });
+                currentNumber = correct;
+                renderDivision();
+
+                if (currentPosition >= dividendDigits.length - 1) {
+                    showCompletion();
+                } else {
+                    showFeedback('success', 'Correct!');
+                    setTimeout(() => { step = 'bring-down'; nextStep(); }, 700);
+                }
+            } else {
+                attempts++;
+                if (attempts >= 2) {
+                    showFeedback('hint', `${currentNumber} − ${product} = ${correct}`);
+                } else {
+                    showFeedback('error', 'Not quite — try again.');
+                }
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function initBringDown() {
+            currentPosition++;
+            step = 'waiting-for-bring-down';
+            renderDivision();
+            nextStep();
+        }
+
+        function confirmBringDown() {
+            const brought = dividendDigits[currentPosition];
+
+            if (workRows.length > 0) {
+                const last = workRows[workRows.length - 1];
+                const newVal = parseInt(last.value.toString() + brought.toString());
+                workRows[workRows.length - 1] = { ...last, value: newVal, position: currentPosition, bringDown: true };
+                currentNumber = newVal;
+            } else {
+                currentNumber = currentNumber * 10 + brought;
+            }
+
+            step = 'check-fit';
+            renderDivision();
+            nextStep();
+        }
+
+        function showFeedback(type, msg) {
+            const fb = document.getElementById('feedback');
+            fb.className = 'feedback ' + type + ' show';
+            fb.textContent = msg;
+        }
+
+        function showCompletion() {
+            document.getElementById('promptArea').style.display = 'none';
+            
+            const quotient = Math.floor(dividend / divisor);
+            const remainder = dividend % divisor;
+
+            let result = `${dividend} ÷ ${divisor} = ${quotient}`;
+            if (remainder > 0) result += ` R${remainder}`;
+
+            document.getElementById('resultText').textContent = result;
+            
+            const summaryText = remainder > 0 
+                ? `You split ${dividend} into ${divisor} piles of ${quotient}, with ${remainder} left over!`
+                : `You split ${dividend} into ${divisor} equal piles of ${quotient}!`;
+            document.getElementById('pileSummary').textContent = summaryText;
+
+            const victoryContainer = document.getElementById('victoryPiles');
+            victoryContainer.innerHTML = '';
+            
+            // Calculate optimal grid size for dots
+            const cols = Math.ceil(Math.sqrt(quotient));
+            
+            // Create piles with dot grids
+            for (let i = 0; i < divisor; i++) {
+                const pile = document.createElement('div');
+                pile.className = 'victory-pile';
+                
+                const dotGrid = document.createElement('div');
+                dotGrid.className = 'dot-grid';
+                dotGrid.style.gridTemplateColumns = `repeat(${cols}, 4px)`;
+                
+                // Create all dots
+                for (let d = 0; d < quotient; d++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    dotGrid.appendChild(dot);
+                }
+                
+                pile.innerHTML = `
+                    <div class="victory-pile-box">
+                        ${dotGrid.outerHTML}
+                    </div>
+                    <span class="victory-pile-label">${quotient} items</span>
+                `;
+                victoryContainer.appendChild(pile);
+            }
+            
+            // Add remainder dots if any
+            if (remainder > 0) {
+                const remainderSection = document.createElement('div');
+                remainderSection.className = 'remainder-section';
+                remainderSection.innerHTML = `<div class="remainder-label">Left over:</div>`;
+                
+                const remainderContainer = document.createElement('div');
+                remainderContainer.className = 'remainder-blocks';
+                
+                for (let r = 0; r < remainder; r++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'remainder-dot';
+                    remainderContainer.appendChild(dot);
+                }
+                
+                remainderSection.appendChild(remainderContainer);
+                victoryContainer.appendChild(remainderSection);
+            }
+
+            document.getElementById('completion').classList.add('show');
+
+            // Animate all dots appearing
+            setTimeout(() => {
+                document.querySelectorAll('.dot, .remainder-dot').forEach((dot, i) => {
+                    setTimeout(() => {
+                        if (dot.classList.contains('dot')) {
+                            dot.classList.add('show');
+                        } else {
+                            dot.style.opacity = '1';
+                            dot.style.transform = 'scale(1)';
+                        }
+                    }, i * 5); // Faster animation since there are many dots
+                });
+            }, 300);
+        }
+
+        function resetToSetup() {
+            setupScreen.style.display = 'block';
+            problemScreen.style.display = 'none';
+            resetBtn.classList.add('hidden');
+            document.getElementById('randomOptions').classList.remove('show');
+            ['bigNumber', 'smallNumber', 'houseDividend', 'houseDivisor'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+    </script>
+</body>
+</html>
